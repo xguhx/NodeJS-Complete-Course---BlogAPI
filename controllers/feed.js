@@ -1,15 +1,6 @@
 const { validationResult } = require("express-validator");
-const { v4: uuidv4 } = require("uuid");
-const Post = require("../models/post");
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "images");
-  },
-  filename: function (req, file, cb) {
-    cb(null, uuidv4());
-  },
-});
+const Post = require("../models/post");
 
 exports.getPosts = (req, res, next) => {
   Post.find()
@@ -31,6 +22,12 @@ exports.createPost = (req, res, next) => {
     error.status = 422;
     throw error;
   }
+  if (!req.file) {
+    const error = new Error("No Image Providaded!");
+    error.statusCode = 422;
+    throw error;
+  }
+
   const title = req.body.title;
   const content = req.body.content;
   const imageUrl = req.file.path.replace("\\", "/");
