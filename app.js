@@ -6,9 +6,9 @@ const multer = require("multer");
 const { v4: uuidv4 } = require("uuid");
 require("dotenv").config();
 
-const feedRoutes = require("./routes/feed");
-const authRoutes = require("./routes/auth");
-
+const { graphqlHTTP } = require("express-graphql");
+const graphQLSchema = require("./graphQL/schema");
+const graphQLResolver = require("./graphQL/resolvers");
 const app = express();
 
 const storage = multer.diskStorage({
@@ -47,8 +47,27 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/feed", feedRoutes);
-app.use("/auth", authRoutes);
+app.use(
+  "/graphql",
+  graphqlHTTP({
+    schema: graphQLSchema,
+    rootValue: graphQLResolver,
+    graphiql: true,
+    customFormatErrorFn(err) {
+      if (!err.originalError) {
+        return err;
+      }
+      const data = err.originalError.data;
+      const message = err.message || "An error occurred!";
+      const code = err.originalError.code || 500;
+      return {
+        message: message,
+        status: code,
+        data: data,
+      };
+    },
+  })
+);
 
 app.use((error, req, res, next) => {
   console.log(error);
@@ -61,10 +80,6 @@ app.use((error, req, res, next) => {
 mongoose
   .connect(process.env.DBSTRING)
   .then((result) => {
-    const server = app.listen(8080);
-    const io = require("socket.io")(server);
-    io.on("connection", (socket) => {
-      console.log("Client Connected");
-    });
+    app.listen(8080);
   })
   .catch((err) => console.log(err));
