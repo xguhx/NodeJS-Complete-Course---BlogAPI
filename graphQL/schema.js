@@ -20,6 +20,11 @@ module.exports = buildSchema(`
         post:[Post!]!
     }
 
+    type AuthData {
+        token:String!
+        userID: String!
+    }
+
     input UserInputData {
         email: String!
         name: String!
@@ -27,7 +32,7 @@ module.exports = buildSchema(`
     }
 
     type RootQuery {
-        hello: String!
+        login(email: String!, password: String!): AuthData!
     }
 
     type RootMutation {
