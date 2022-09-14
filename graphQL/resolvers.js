@@ -1,6 +1,8 @@
 const User = require("../models/user");
+const Post = require("../models/post");
 const bcrypt = require("bcryptjs");
 const validator = require("validator");
+const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 module.exports = {
@@ -19,7 +21,7 @@ module.exports = {
     }
 
     if (errors.length > 0) {
-      const error = new Error("Invalid Input!");
+      const error = new Error("Invalid input!");
       error.data = errors;
       error.code = 422;
       throw error;
@@ -70,6 +72,65 @@ module.exports = {
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
-    return { token: token, userId: user._id.toString() };
+    return { token: token, userID: user._id.toString() };
+  },
+
+  createPost: async ({ postInput }, req) => {
+    const errors = [];
+
+    if (!req.isAuth) {
+      const error = new Error("Not Authenticated!");
+      error.code = 401;
+      throw error;
+    }
+
+    //Input Validation
+    if (
+      validator.isEmpty(postInput.title) ||
+      !validator.isLength(postInput.title, { min: 5 })
+    ) {
+      errors.push({ message: "Title is invalid!" });
+    }
+
+    if (
+      validator.isEmpty(postInput.content) ||
+      !validator.isLength(postInput.title, { min: 5 })
+    ) {
+      errors.push({ message: "Content is invalid!" });
+    }
+
+    if (errors.length > 0) {
+      const error = new Error("Invalid input!");
+      error.data = errors;
+      error.code = 422;
+      throw error;
+    }
+
+    const user = await User.findById(req.userId);
+
+    if (!user) {
+      const error = new Error("Invalid user!");
+      error.code = 401;
+      throw error;
+    }
+
+    const post = new Post({
+      title: postInput.title,
+      content: postInput.content,
+      imageUrl: postInput.imageUrl,
+      creator: user,
+    });
+    const createdPost = await post.save();
+
+    user.posts.push(createdPost);
+
+    await user.save();
+
+    return {
+      ...createdPost._doc,
+      _id: createdPost._id.toString(),
+      createdAt: createdPost.createdAt.toISOString(),
+      updatedAt: createdPost.updatedAt.toISOString(),
+    };
   },
 };

@@ -9,6 +9,8 @@ require("dotenv").config();
 const { graphqlHTTP } = require("express-graphql");
 const graphQLSchema = require("./graphQL/schema");
 const graphQLResolver = require("./graphQL/resolvers");
+
+const auth = require("./middleware/auth");
 const app = express();
 
 const storage = multer.diskStorage({
@@ -50,6 +52,8 @@ app.use((req, res, next) => {
 
   next();
 });
+
+app.use(auth);
 
 app.use(
   "/graphql",
