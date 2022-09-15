@@ -2,8 +2,11 @@ const path = require("path");
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+
 const multer = require("multer");
 const { v4: uuidv4 } = require("uuid");
+
+const { clearImage } = require("./util/file");
 require("dotenv").config();
 
 const { graphqlHTTP } = require("express-graphql");
@@ -54,6 +57,24 @@ app.use((req, res, next) => {
 });
 
 app.use(auth);
+
+app.put("/post-image", (req, res, next) => {
+  if (!req.isAuth) {
+    throw new Error("Not Authenticated!");
+  }
+
+  if (!req.file) {
+    return res.status(200).json({ message: "No file provided!" });
+  }
+
+  if (req.body.oldPath) {
+    clearImage(req.body.oldPath);
+  }
+  return res.status(201).json({
+    message: "File Stored",
+    filePath: req.file.path.replace("\\", "/"),
+  });
+});
 
 app.use(
   "/graphql",
