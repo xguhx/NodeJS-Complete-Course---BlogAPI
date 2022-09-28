@@ -115,6 +115,6 @@ app.use((error, req, res, next) => {
 mongoose
   .connect(process.env.DBSTRING)
   .then((result) => {
-    app.listen(8080);
+    app.listen(process.env.PORT || 8080);
   })
   .catch((err) => console.log(err));
