@@ -58,6 +58,12 @@ app.use((req, res, next) => {
 
 app.use(auth);
 
+app.get("/", (req, res, next) => {
+  return res.status(200).json({
+    message: "Hello, This is the REST API for the Blog App",
+  });
+});
+
 app.put("/post-image", (req, res, next) => {
   if (!req.isAuth) {
     throw new Error("Not Authenticated!");
