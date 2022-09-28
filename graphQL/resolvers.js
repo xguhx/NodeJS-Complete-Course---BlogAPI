@@ -78,7 +78,7 @@ module.exports = {
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
-    return { token: token, userID: user._id.toString() };
+    return { token: token, userId: user._id.toString() };
   },
 
   createPost: async ({ postInput }, req) => {
@@ -298,5 +298,38 @@ module.exports = {
       return false;
     }
     return true;
+  },
+
+  getUserStatus: async ({ userId }, req) => {
+    if (!req.isAuth) {
+      const error = new Error("Not Authenticated!");
+      error.code = 401;
+      throw error;
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error("User not Found!");
+    }
+
+    return { ...user._doc };
+  },
+
+  editUserStatus: async ({ userId, userInput }, req) => {
+    if (!req.isAuth) {
+      const error = new Error("Not Authenticated!");
+      error.code = 401;
+      throw error;
+    }
+
+    let user = await User.findById(userId);
+    if (!user) {
+      throw new Error("User not Found!");
+    }
+
+    user.status = userInput;
+    user = await user.save();
+
+    return { ...user._doc };
   },
 };
