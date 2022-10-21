@@ -23,6 +23,7 @@ module.exports = {
     }
 
     if (errors.length > 0) {
+      errors.push(userInput);
       const error = new Error("Invalid input!");
       error.data = errors;
       error.code = 422;
@@ -46,7 +47,7 @@ module.exports = {
     const createdUser = await user.save();
 
     return {
-      ...this.createUser._doc,
+      ...createdUser._doc,
       _id: createdUser._id.toString(),
       email: userInput.email,
     };
