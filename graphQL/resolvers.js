@@ -155,7 +155,7 @@ module.exports = {
       page = 1;
     }
 
-    const perPage = 2;
+    const perPage = 5;
 
     const totalPosts = await Post.find().countDocuments();
 
