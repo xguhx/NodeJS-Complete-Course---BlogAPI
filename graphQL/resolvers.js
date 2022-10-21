@@ -108,7 +108,7 @@ module.exports = {
     }
 
     if (errors.length > 0) {
-      const error = new Error("Invalid input!");
+      const error = new Error(`Invalid input: ${errors[0].message}`);
       error.data = errors;
       error.code = 422;
       throw error;
@@ -145,6 +145,7 @@ module.exports = {
 
   posts: async ({ page }, req) => {
     //check for authentication
+
     if (!req.isAuth) {
       const error = new Error("Not Authenticated!");
       error.code = 401;
@@ -245,7 +246,7 @@ module.exports = {
     }
 
     if (errors.length > 0) {
-      const error = new Error("Invalid input!");
+      const error = new Error(`Invalid input: ${errors[0].message}`);
       error.data = errors;
       error.code = 422;
       throw error;
